@@ -21,7 +21,10 @@ jobs:
         shell: bash
         run: |
           set -e
-          test -f source.zip || { echo "ERROR: source.zip is missing"; exit 1; }
+          test -f source.zip || {
+            echo "ERROR: source.zip is missing from repository root"
+            exit 1
+          }
           mkdir -p /tmp/phonecluster-source
           unzip -q source.zip -d /tmp/phonecluster-source
           test -d /tmp/phonecluster-source/PhoneClusterAndroid || {
@@ -39,21 +42,17 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          accept-android-sdk-licenses: false
 
       - name: Accept Android SDK licenses
         shell: bash
         run: |
-          set -e
-          mkdir -p "$ANDROID_HOME/licenses"
-          printf '%s\n' \
-            "8933bad161af4178b1185d1a37fbf41ea5269c55" \
-            "d56f5187479451eabf01fb78af6dfcb131a6481e" \
-            "24333f8a63b6825ea9c5514f83c2829b004d1fee" \
-            > "$ANDROID_HOME/licenses/android-sdk-license"
           yes | sdkmanager --licenses || true
 
       - name: Install Android SDK packages
-        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+        run: |
+          sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
